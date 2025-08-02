@@ -1,8 +1,7 @@
 use sysinfo::System;
 
-pub fn memory() -> String {
-    let mut sys: System = System::new_all();
-    sys.refresh_all();
+pub fn memory(sys: &mut System) -> String {
+    sys.refresh_memory();
 
     format!(
         "Memoria: {} MB / {} MB",

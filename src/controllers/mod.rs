@@ -1,5 +1,5 @@
-pub mod os;
-pub mod disk;
-pub mod memory;
 pub mod cpu;
+pub mod disk;
 pub mod gpu;
+pub mod memory;
+pub mod os;

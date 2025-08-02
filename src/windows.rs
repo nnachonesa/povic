@@ -2,31 +2,39 @@
 
 use serde::Deserialize;
 use tokio::join;
-use winreg::{RegKey, enums::HKEY_LOCAL_MACHINE};
+use winreg::RegKey;
+use winreg::enums::HKEY_LOCAL_MACHINE;
 use wmi::{COMLibrary, WMIConnection};
 
 const HKLM: RegKey = RegKey::predef(HKEY_LOCAL_MACHINE);
 
-type Info = (
-    Win32_Processor,
-    Win32_VideoController,
-);
+type Info = (Win32_Processor, Win32_VideoController);
 
 pub async fn fetch<'a>() -> Info {
     let con = get_wmi_con();
 
-    let cpu_info_future = con
-        .async_raw_query::<Win32_Processor>("SELECT Name, Architecture, CurrentClockSpeed, CurrentVoltage, MaxClockSpeed, NumberOfCores, NumberOfEnabledCore, NumberOfLogicalProcessors, LoadPercentage, ThreadCount FROM Win32_Processor");
-
-    let video_controller_info_future = con.async_raw_query::<Win32_VideoController>("SELECT Name, AdapterRAM, CurrentHorizontalResolution, CurrentVerticalResolution, CurrentRefreshRate FROM Win32_VideoController");
-
-    let ( cpu_info, video_controller_info) = join!(
-        
-        cpu_info_future,
-        video_controller_info_future,
+    let cpu_info_future = con.async_raw_query::<Win32_Processor>(
+        "SELECT Name, Architecture, CurrentClockSpeed, CurrentVoltage, MaxClockSpeed, \
+         NumberOfCores, NumberOfEnabledCore, NumberOfLogicalProcessors, LoadPercentage, \
+         ThreadCount FROM Win32_Processor",
     );
-    let cpu = cpu_info.expect("No se pudo obtener info de CPU").into_iter().next().expect("Sin resultados CPU");
-    let gpu = video_controller_info.expect("No se pudo obtener info de GPU").into_iter().next().expect("Sin resultados GPU");
+
+    let video_controller_info_future = con.async_raw_query::<Win32_VideoController>(
+        "SELECT Name, AdapterRAM, CurrentHorizontalResolution, CurrentVerticalResolution, \
+         CurrentRefreshRate FROM Win32_VideoController",
+    );
+
+    let (cpu_info, video_controller_info) = join!(cpu_info_future, video_controller_info_future,);
+    let cpu = cpu_info
+        .expect("No se pudo obtener info de CPU")
+        .into_iter()
+        .next()
+        .expect("Sin resultados CPU");
+    let gpu = video_controller_info
+        .expect("No se pudo obtener info de GPU")
+        .into_iter()
+        .next()
+        .expect("Sin resultados GPU");
 
     (cpu, gpu)
 }
