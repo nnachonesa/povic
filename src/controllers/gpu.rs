@@ -26,7 +26,7 @@ VRAM: {} MB
             self.horizontal_resolution.unwrap_or(0),
             self.vertical_resolution.unwrap_or(0),
             self.refresh_rate.unwrap_or(0),
-            self.vram
+            (self.vram / 1024) / 1024
         )
     }
 }

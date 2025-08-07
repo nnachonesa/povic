@@ -41,7 +41,7 @@ impl Default for App {
 }
 
 impl App {
-    const FRAMES_PER_SECOND: f32 = 23.0;
+    const FRAMES_PER_SECOND: f32 = 120.0;
 
     pub async fn run(mut self, mut terminal: DefaultTerminal) -> Result<()> {
         let period = Duration::from_secs_f32(1.0 / Self::FRAMES_PER_SECOND);
